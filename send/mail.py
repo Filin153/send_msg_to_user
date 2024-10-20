@@ -1,20 +1,22 @@
 import logging
 import smtplib
-from email_validator import validate_email
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+from email_validator import validate_email
 
 
 class SMTP:
     def __init__(self, smtp_server: str, smtp_port: int,
                  smtp_username: str, smtp_password: str,
-                 ssl: bool = False, tls: bool = False):
+                 ssl: bool = False, tls: bool = False, timeout: int = 10):
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.smtp_username = smtp_username
         self.smtp_password = smtp_password
         self.tls = tls
         self.ssl = ssl
+        self.timeout = timeout
 
         self._server = None
 
@@ -24,10 +26,10 @@ class SMTP:
         :return:
         """
         if self.ssl:
-            self._server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port)
+            self._server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=self.timeout)
             logging.info("SMTP connection established, with SMTP_SSL")
         else:
-            self._server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+            self._server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=self.timeout)
             logging.info("SMTP connection established")
             if self.tls:
                 self._server.starttls()
@@ -62,9 +64,12 @@ class SMTP:
 
         return True
 
+
 class Mail(SMTP):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, smtp_server: str, smtp_port: int,
+                 smtp_username: str, smtp_password: str,
+                 ssl: bool = False, tls: bool = False):
+        super().__init__(smtp_server, smtp_port, smtp_username, smtp_password, ssl, tls)
 
     async def send(self, to_email: str, title: str, body: str):
         """
@@ -85,7 +90,6 @@ class Mail(SMTP):
         logging.info(f"Mail sent successfully to {to_email}")
         return True
 
-
     @staticmethod
     async def __validate_email(email: str) -> str:
         """
@@ -96,5 +100,3 @@ class Mail(SMTP):
         emailinfo = validate_email(email, check_deliverability=False)
         email = emailinfo.normalized
         return email
-
-
