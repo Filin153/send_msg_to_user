@@ -79,6 +79,7 @@ class Mail(SMTP):
         :param body: email body, supports HTML
         :return:
         """
+        await self.connect()
         to_email = await self.__validate_email(to_email)
         msg = MIMEMultipart()
         msg["From"] = self.smtp_username
@@ -88,6 +89,7 @@ class Mail(SMTP):
 
         self._server.sendmail(self.smtp_username, to_email, msg.as_string())
         logging.info(f"Mail sent successfully to {to_email}")
+        await self.disconnect()
         return True
 
     @staticmethod
