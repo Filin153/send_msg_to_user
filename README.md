@@ -1,3 +1,5 @@
+# API and Worker with RabbitMQ for send msg to email.
+
 # Use
 
     smtp_server = "smtp.some.com"  # SMTP server address
