@@ -8,7 +8,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=CreateMessage)
+@router.post("/")
 async def create_message(create_message: CreateMessage):
     await add_new_msg_task(create_message)
     return True

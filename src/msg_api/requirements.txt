@@ -2,3 +2,4 @@ email-validator
 fastapi[all]
 pika
 python-dotenv
+pydantic
