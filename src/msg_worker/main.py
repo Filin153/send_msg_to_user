@@ -1,4 +1,4 @@
-from rabbitmq import send_msg
+from send.rabbitmq import send_msg
 import asyncio
 
 def main():

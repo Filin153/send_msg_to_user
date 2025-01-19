@@ -1,8 +1,9 @@
 import pika
 from send import Mail
-import asyncio
 from config import settings
 import json
+from .schemas import CreateMessage
+
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', port=5672))
 channel = connection.channel()
@@ -17,6 +18,16 @@ async def send_msg():
 
     channel.basic_consume(queue='msg', on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
+
+async def add_new_msg_task(create_message: CreateMessage):
+    if create_message.type == 'admin':
+        channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(), properties=pika.BasicProperties(priority=2))
+    elif create_message.type == 'info':
+        channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(), properties=pika.BasicProperties(priority=1))
+    else:
+        channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(), properties=pika.BasicProperties(priority=0))
+
+    print("Add new msg")
 
 
 

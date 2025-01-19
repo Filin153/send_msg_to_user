@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from rabbitmq import close_rabbitmq
+from send.rabbitmq import close_rabbitmq
 from routers import router as api_router
 
 
