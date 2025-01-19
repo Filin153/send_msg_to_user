@@ -2,7 +2,7 @@ import pika
 from send import Mail
 from config import settings
 import json
-from .schemas import CreateMessage
+from .schemas import CreateMessage, TypeEnum
 
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', port=5672))
@@ -20,9 +20,9 @@ async def send_msg():
     channel.start_consuming()
 
 async def add_new_msg_task(create_message: CreateMessage):
-    if create_message.type == 'admin':
+    if create_message.type == TypeEnum.admin:
         channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(), properties=pika.BasicProperties(priority=2))
-    elif create_message.type == 'info':
+    elif create_message.type == TypeEnum.info:
         channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(), properties=pika.BasicProperties(priority=1))
     else:
         channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(), properties=pika.BasicProperties(priority=0))
