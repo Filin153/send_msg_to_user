@@ -1,5 +1,5 @@
 import pika
-from send import Mail
+from .mail import Mail
 from config import settings
 import json
 from .schemas import CreateMessage
