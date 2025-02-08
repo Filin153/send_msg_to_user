@@ -13,6 +13,7 @@ load_dotenv()
 class RabbitMqMail:
     _instance = None
     _initialized = False
+    __queue = "email_msg"
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -28,7 +29,7 @@ class RabbitMqMail:
             pika.ConnectionParameters(host='rabbitmq', port=5672)
         )
         self.channel = self.connection.channel()
-        self.channel.queue_declare(queue='msg', arguments={'x-max-priority': 2})
+        self.channel.queue_declare(queue=self.__queue, arguments={'x-max-priority': 2})
 
         self.email = Mail(
             os.getenv("SMTP_SERVER"),
@@ -44,18 +45,18 @@ class RabbitMqMail:
             self.email.send_sync(body['send_to'], body['title'], body['message'])
 
         while True:
-            self.channel.basic_consume(queue='msg', on_message_callback=callback, auto_ack=True)
+            self.channel.basic_consume(queue=self.__queue, on_message_callback=callback, auto_ack=True)
             self.channel.start_consuming()
 
     async def send_msg(self, create_message: CreateMessage):
         if create_message.type == 'admin':
-            self.channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(),
+            self.channel.basic_publish(exchange='', routing_key=self.__queue, body=create_message.json(),
                                        properties=pika.BasicProperties(priority=2))
         elif create_message.type == 'info':
-            self.channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(),
+            self.channel.basic_publish(exchange='', routing_key=self.__queue, body=create_message.json(),
                                        properties=pika.BasicProperties(priority=1))
         else:
-            self.channel.basic_publish(exchange='', routing_key='msg', body=create_message.json(),
+            self.channel.basic_publish(exchange='', routing_key=self.__queue, body=create_message.json(),
                                        properties=pika.BasicProperties(priority=0))
 
     async def close_rabbitmq(self):
