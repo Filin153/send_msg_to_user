@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
-from send.rabbitmq import add_new_msg_task
-from send.schemas import CreateMessage
+from send.mail import CreateMessage, Mail
 
 router = APIRouter(
     prefix="/msg",
 )
+mail = Mail()
 
 
 @router.post("/")
 async def create_message(create_message: CreateMessage):
-    await add_new_msg_task(create_message)
+    await mail.send_msg(create_message)
     return True

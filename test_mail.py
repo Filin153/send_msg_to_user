@@ -1,5 +1,5 @@
 import pytest
-from send import Mail
+from send.mail.mail import Mail
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import pathlib

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from routers import router as api_router
-from send.rabbitmq import close_rabbitmq
+from send.mail import Mail
 
 app = FastAPI(
     title="Message API",
@@ -11,7 +11,7 @@ app = FastAPI(
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await close_rabbitmq()
+    await Mail().close_rabbitmq()
 
 
 app.include_router(api_router)
